@@ -1,20 +1,23 @@
 package com.pride.testtrainee
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.pride.testtrainee.Clases.Data
+import com.pride.testtrainee.ViewModel.ClickListener
+import com.pride.testtrainee.ViewModel.ListAdapter
+import com.pride.testtrainee.ViewModel.ViewModelBinding
 import com.pride.testtrainee.databinding.FragmentGifListBinding
 
 
 class GifList : Fragment(), ClickListener {
-private lateinit var binding : FragmentGifListBinding
-    private var adapter = ListAdapter(this)
+    private lateinit var binding: FragmentGifListBinding
+    private val viewM: ViewModelBinding by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,15 +29,22 @@ private lateinit var binding : FragmentGifListBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listText = arrayListOf("text1","text2","text3","text1","text2","text3","text1","text2","text3","text1","text2","text3")
-        adapter.setData(listText)
+        val adapter = ListAdapter(this, requireContext())
+        viewM.getListFromRepo()
+        viewM.gifList.observe(viewLifecycleOwner) {
+            if (it != null) {
+                adapter.setData(it)
+            }
+        }
+
         binding.rcView.adapter = adapter
         binding.rcView.layoutManager = GridLayoutManager(
             requireContext(), 3
         )
     }
 
-    override fun onClick(text: String) {
-        Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
+    override fun onClick(gif: Data) {
+        Navigation.findNavController(binding.root).navigate(R.id.action_gifList_to_selectGif)
+        viewM.selectGif(gif)
     }
 }
